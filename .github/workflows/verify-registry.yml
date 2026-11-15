@@ -1,0 +1,44 @@
+name: Verify published image
+on:
+  push:
+    branches: [verify/registry-pull]
+permissions: {}
+jobs:
+  pull-and-run:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/agugis/devops-ci-app
+      RELEASE_SHA: 492f50258334b0e2a4953755d8c16564816f299c
+    steps:
+      - name: Pull and run published tags
+        run: |
+          set -euo pipefail
+          export DOCKER_CONFIG
+          DOCKER_CONFIG=$(mktemp -d)
+          cleanup() {
+            docker rm -f check-latest check-sha >/dev/null 2>&1 || true
+            rm -rf "$DOCKER_CONFIG"
+          }
+          trap cleanup EXIT
+          for attempt in {1..20}; do
+            if docker pull "$IMAGE:$RELEASE_SHA"; then break; fi
+            if [ "$attempt" -eq 20 ]; then exit 1; fi
+            sleep 5
+          done
+          docker pull "$IMAGE:latest"
+          check_image() {
+            local tag="$1" name="$2" port="$3"
+            echo "Testing $IMAGE:$tag"
+            docker run -d --name "$name" -p "127.0.0.1:$port:5000" "$IMAGE:$tag"
+            curl --fail --silent --show-error --retry 12 --retry-connrefused --retry-delay 1 \
+              "http://127.0.0.1:$port/health" | tee "$name.json"
+            python3 -c 'import json, sys; assert json.load(open(sys.argv[1])) == {"status": "ok"}' "$name.json"
+            docker exec "$name" id
+            test "$(docker exec "$name" id -u)" != 0
+            docker logs "$name"
+          }
+          check_image latest check-latest 5001
+          check_image "$RELEASE_SHA" check-sha 5002
+          docker image inspect --format '{{.Id}} {{json .RepoDigests}}' "$IMAGE:latest" "$IMAGE:$RELEASE_SHA"
+          test "$(docker image inspect --format '{{.Id}}' "$IMAGE:latest")" = \
+               "$(docker image inspect --format '{{.Id}}' "$IMAGE:$RELEASE_SHA")"

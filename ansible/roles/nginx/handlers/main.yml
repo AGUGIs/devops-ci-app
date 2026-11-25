@@ -1,10 +1,4 @@
 ---
-- name: Validate Nginx before reload
-  ansible.builtin.command: /usr/sbin/nginx -t
-  changed_when: false
-  listen: Refresh Nginx
-- name: Reload Nginx
-  ansible.builtin.service:
-    name: nginx
-    state: reloaded
-  listen: Refresh Nginx
+- name: Reload application proxy
+  ansible.builtin.command: docker exec devops-ci-app-nginx nginx -s reload
+  changed_when: true

@@ -1,7 +1,6 @@
 ---
 - name: Configure and deploy devops VM
   hosts: vm
-  become: true
   roles:
     - base
     - ssh

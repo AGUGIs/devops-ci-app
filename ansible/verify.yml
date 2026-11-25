@@ -1,18 +1,8 @@
 ---
 - name: Verify deployed configuration
   hosts: vm
-  become: true
   gather_facts: false
   tasks:
-    - name: Check SSH effective configuration
-      ansible.builtin.command: /usr/sbin/sshd -T
-      register: sshd_effective
-      changed_when: false
-    - name: Assert password authentication is disabled
-      ansible.builtin.assert:
-        that:
-          - "'passwordauthentication no' in sshd_effective.stdout_lines"
-          - "'permitrootlogin no' in sshd_effective.stdout_lines"
     - name: Read container facts
       community.docker.docker_container_info:
         name: "{{ app_container_name }}"

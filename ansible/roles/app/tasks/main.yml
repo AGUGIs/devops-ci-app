@@ -1,9 +1,4 @@
 ---
-- name: Allow devops to inspect Docker
-  ansible.builtin.user:
-    name: devops
-    groups: docker
-    append: true
 - name: Pull reviewed application image
   community.docker.docker_image:
     name: "{{ app_image }}"

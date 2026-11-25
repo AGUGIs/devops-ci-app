@@ -6,4 +6,4 @@ app_host_port: 5001
 nginx_ip: 192.168.255.101
 nginx_port: 8080
 app_internal_port: 5000
-automation_public_key_file: "{{ lookup('env', 'HOME') }}/.ssh/devops_vm.pub"
+nginx_image: nginx:alpine

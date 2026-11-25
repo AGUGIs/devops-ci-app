@@ -1,26 +1,21 @@
 ---
-- name: Install Nginx
-  ansible.builtin.apt:
-    name: nginx
-    state: present
-    update_cache: true
-    cache_valid_time: 3600
+- name: Create proxy configuration directory
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.local/share/devops-ci-app"
+    state: directory
+    mode: "0755"
 - name: Configure application reverse proxy
   ansible.builtin.template:
     src: devops-ci-app.conf.j2
-    dest: /etc/nginx/sites-available/devops-ci-app
-    owner: root
-    group: root
+    dest: "{{ ansible_user_dir }}/.local/share/devops-ci-app/default.conf"
     mode: "0644"
-  notify: Refresh Nginx
-- name: Enable application site
-  ansible.builtin.file:
-    src: /etc/nginx/sites-available/devops-ci-app
-    dest: /etc/nginx/sites-enabled/devops-ci-app
-    state: link
-  notify: Refresh Nginx
-- name: Enable Nginx service
-  ansible.builtin.service:
-    name: nginx
+  notify: Reload application proxy
+- name: Run dedicated Nginx container
+  community.docker.docker_container:
+    name: devops-ci-app-nginx
+    image: "{{ nginx_image }}"
+    network_mode: host
     state: started
-    enabled: true
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ ansible_user_dir }}/.local/share/devops-ci-app/default.conf:/etc/nginx/conf.d/default.conf:ro"

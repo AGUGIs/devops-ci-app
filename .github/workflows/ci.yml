@@ -88,14 +88,7 @@ jobs:
               echo "::error::/health did not respond after 15 attempts"
               exit 1
             fi
-            python3 -m json.tool health.json
-            python3 - <<'PY'
-            import json
-            from pathlib import Path
-
-            payload = json.loads(Path("health.json").read_text(encoding="utf-8"))
-            assert payload == {"status": "ok"}, f"unexpected /health payload: {payload}"
-            PY
+            python3 -c 'import json, sys; sys.exit(0 if json.load(sys.stdin) == {"status": "ok"} else "unexpected /health payload")' < health.json
             docker exec smoke id
             cleanup
           done

@@ -1,0 +1,6 @@
+---
+- name: Verify runner uses the existing deployment account
+  ansible.builtin.assert:
+    that:
+      - ansible_user_id == 'devops'
+      - ansible_connection == 'local'

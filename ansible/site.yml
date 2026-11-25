@@ -1,0 +1,8 @@
+---
+- name: Configure and deploy devops VM
+  hosts: vm
+  roles:
+    - base
+    - ssh
+    - nginx
+    - app

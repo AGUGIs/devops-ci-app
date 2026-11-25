@@ -1,0 +1,4 @@
+---
+- name: Reload application proxy
+  ansible.builtin.command: docker exec devops-ci-app-nginx nginx -s reload
+  changed_when: true

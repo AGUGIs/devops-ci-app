@@ -1,0 +1,9 @@
+---
+app_image: ghcr.io/agugis/devops-ci-app
+app_tag: "492f50258334b0e2a4953755d8c16564816f299c"
+app_container_name: devops-ci-app
+app_host_port: 5001
+nginx_ip: 192.168.255.101
+nginx_port: 8080
+app_internal_port: 5000
+nginx_image: nginx:alpine

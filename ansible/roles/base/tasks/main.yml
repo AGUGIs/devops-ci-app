@@ -1,0 +1,10 @@
+---
+- name: Assert supported VM platform
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+      - ansible_distribution_version is version("24.04", "==")
+      - ansible_architecture in ["x86_64", "aarch64"]
+- name: Verify existing Docker access
+  ansible.builtin.command: docker info --format={{ '{{.ServerVersion}}' }}
+  changed_when: false

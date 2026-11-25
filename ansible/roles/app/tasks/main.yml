@@ -11,12 +11,20 @@
     image: "{{ app_image }}:{{ app_tag }}"
     state: started
     restart_policy: unless-stopped
-    published_ports:
-      - "127.0.0.1:{{ app_host_port }}:{{ app_internal_port }}"
+    network_mode: host
+    command_handling: correct
+    command:
+      - gunicorn
+      - --bind
+      - "127.0.0.1:{{ app_host_port }}"
+      - --access-logfile
+      - "-"
+      - app.app:app
 - name: Wait for application health
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ app_host_port }}/health"
     return_content: true
+    timeout: 3
   register: app_health
   retries: 15
   delay: 2

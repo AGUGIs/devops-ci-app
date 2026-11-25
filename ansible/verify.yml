@@ -13,7 +13,8 @@
           - container_info.exists
           - container_info.container.State.Running
           - container_info.container.Config.Image == app_image ~ ':' ~ app_tag
-          - container_info.container.NetworkSettings.Ports[app_internal_port | string ~ '/tcp'][0].HostIp == '127.0.0.1'
+          - container_info.container.HostConfig.NetworkMode == 'host'
+          - "('127.0.0.1:' ~ app_host_port) in container_info.container.Config.Cmd"
     - name: Check direct application health
       ansible.builtin.uri:
         url: "http://127.0.0.1:{{ app_host_port }}/health"
